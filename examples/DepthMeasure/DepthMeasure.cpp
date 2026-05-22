@@ -8,11 +8,13 @@
 #include "Common.h"
 #include "Logger.h"
 using namespace PointCloud;
+#ifndef _WIN32
 #include <unistd.h>
+#include <sys/wait.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include "CameraSystem.h"
-#include <sys/wait.h>
 #include <iostream>
 #include <fstream>
  

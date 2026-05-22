@@ -7,17 +7,23 @@
 #  define POINTCLOUD_NO_EXPORT
 #else
 #  ifndef POINTCLOUD_EXPORT
-#    ifdef pointcloud_EXPORTS
-        /* We are building this library */
-#      define POINTCLOUD_EXPORT __attribute__((visibility("default")))
+#    if defined(_MSC_VER)
+#      ifdef pointcloud_EXPORTS
+#        define POINTCLOUD_EXPORT __declspec(dllexport)
+#      else
+#        define POINTCLOUD_EXPORT __declspec(dllimport)
+#      endif
 #    else
-        /* We are using this library */
 #      define POINTCLOUD_EXPORT __attribute__((visibility("default")))
 #    endif
 #  endif
 
 #  ifndef POINTCLOUD_NO_EXPORT
-#    define POINTCLOUD_NO_EXPORT __attribute__((visibility("hidden")))
+#    if defined(_MSC_VER)
+#      define POINTCLOUD_NO_EXPORT
+#    else
+#      define POINTCLOUD_NO_EXPORT __attribute__((visibility("hidden")))
+#    endif
 #  endif
 #endif
 
