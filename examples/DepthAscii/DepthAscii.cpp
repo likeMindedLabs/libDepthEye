@@ -25,65 +25,65 @@ CameraSystem depthEyeSys;
 int col_factor = 1;
 int row_factor = 2;
 
-int printOutFrameInfo(const ToFRawFrame *tofRawFrame,int col_factor,int row_factor){
-	 
-    FrameSize _size = tofRawFrame->size;
+int printOutFrameInfo(const DepthFrame *depthFrame, int col_factor, int row_factor) {
+    if (!depthFrame) return -1;
 
-    char buffer[(_size.width/2)*(_size.height/(row_factor-1)+1)];
-    char * out = buffer;
-	  const short one_meter = static_cast<short>(1.0f);
-    short coverage[_size.width/(col_factor-1)+1] ;
+    FrameSize _size = depthFrame->size;
+    
+    // Ensure buffer is large enough
+    size_t buffer_size = (_size.width / col_factor + 2) * (_size.height / row_factor + 1);
+    char buffer[buffer_size];
+    char *out = buffer;
 
-  
-   	int k=0;
-    for(int y=0; y<_size.height; ++y)
-    {
-        for(int x=0; x<_size.width; ++x)
-        {
-            // short depth = phaseFrame[y*80+x]/100;
-            // std::cout << "x%col_factor : " << x%col_factor  << std::endl;
-            if(x%col_factor == 1){
-                 ushort depth=((ushort *)tofRawFrame->phase())[k]/100;
-                if(depth > 0 && depth < 12)
-                {
-                	 coverage[x/col_factor] += static_cast<short>(depth);
-                }else
-                	 coverage[x/col_factor] = 0;
+    short coverage[_size.width / col_factor + 1];
+
+    int k = 0;
+    for (int y = 0; y < _size.height; ++y) {
+        for (int x = 0; x < _size.width; ++x) {
+            if (x % col_factor == 0) { // Check every 'col_factor' pixel starting from 0
+                int coverage_idx = x / col_factor;
+                if (coverage_idx < (_size.width / col_factor + 1)) {
+                    float depth = depthFrame->depth[k];
+                    // Scale float depth (meters) to an integer for the ASCII mapping logic.
+                    // Map a 0-2.4 meter range to an integer range of 0-11.
+                    short depth_int = (short)(depth * 5);
+                    if (depth > 0 && depth_int > 0 && depth_int < 12) {
+                        coverage[coverage_idx] += depth_int;
+                    }
+                }
             }
             k++;
         }
-         
-        if(y%row_factor == 1){
-	        for(short & c : coverage)
-	        {
-              
-               // std::cout << "coverage index: " << c << std::endl;
-	            *out++ =  " M@#&$%*o!;."[c/row_factor];
-	            c = 0;
-	        }
-        	*out++ = '\n';
-    	  }
+
+        if (y % row_factor == 1) { // Render a line of ASCII
+            for (int i = 0; i < _size.width / col_factor; ++i) {
+                short &c = coverage[i];
+                // Use the accumulated coverage value to select a character.
+                // The character map is darkest to brightest.
+                *out++ = " M@#&$%*o!;."[c / row_factor];
+                c = 0; // Reset coverage for the next line
+            }
+            *out++ = '\n';
+        }
     }
-    *out++ = 0;
+    *out = '\0'; // Null-terminate the string
     printf("\n%s", buffer);
-	return 0;
+    return 0;
 }
 
 
 void rawdataCallback(DepthCamera &dc, const Frame &frame, DepthCamera::FrameType c) 
 {
-
-	const ToFRawFrame *d = dynamic_cast<const ToFRawFrame *>(&frame);
+    // The callback now expects a DepthFrame
+	const DepthFrame *d = dynamic_cast<const DepthFrame *>(&frame);
 
 	if(!d)
 	{
-		std::cout << "Null frame captured? or not of type ToFRawFrame"<< col_factor<< " ,"<<row_factor << std::endl;
+		std::cout << "Null frame captured? or not of type DepthFrame" << std::endl;
 		return;
 	}
-	std::cout << " factor"<< col_factor<< " ,"<<row_factor << std::endl;
     
-	printOutFrameInfo(d,col_factor,row_factor);
-
+	printOutFrameInfo(d, col_factor, row_factor);
 }
 
 
@@ -109,6 +109,10 @@ int main(int argc, char const *argv[])
       return 1;
   }
 
+  if(!depthCamera->Init()) {
+    std::cout << "Could not init Depth Camera " << device->id() << std::endl;
+  }
+
 	if (!depthCamera->isInitialized()) {
         std::cout <<"||| Depth camera not initialized for device " << std::endl;
         return 1;
@@ -122,7 +126,7 @@ int main(int argc, char const *argv[])
   }
   std::cout << " ||| Successfully loaded depth camera for device " << std::endl;
 
-	depthCamera->registerCallback(DepthCamera::FRAME_RAW_FRAME_PROCESSED,rawdataCallback);
+	depthCamera->registerCallback(DepthCamera::FRAME_DEPTH_FRAME,rawdataCallback);
 	
 	if(depthCamera->start()){
           logger(LOG_INFO) <<  " ||| start camera pass" << std::endl;

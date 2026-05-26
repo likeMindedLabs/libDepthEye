@@ -12,4 +12,6 @@ print('detach OK')
 "
 
 sleep 1
-sudo ./build/bin/DepthMeasure
+
+sudo ./bin/DepthAscii
+#sudo ./bin/DepthMeasure
