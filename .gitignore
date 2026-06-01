@@ -1,1 +1,21 @@
+# --- IDEs and System Files ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json
+.vscode/tasks.json
+# We EXCLUDE launch.json so team members share the same Launch Profiles
+!.vscode/launch.json
 
+# --- Python Environment ---
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

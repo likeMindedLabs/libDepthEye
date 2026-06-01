@@ -37,5 +37,6 @@ except usb.core.USBError as e:
 
 sleep 1
 
-sudo ./bin/DepthAscii
+#sudo ./bin/DepthAscii
 #sudo ./bin/DepthMeasure
+sudo ./integrations/pointcloud_deptheyes2/libDepthEye/build/bin/DepthCloud
