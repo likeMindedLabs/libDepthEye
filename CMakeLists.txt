@@ -124,7 +124,7 @@ set(CPACK_SOURCE_GENERATOR "Developer")
 # Subprojects / examples
 #add_subdirectory(examples/DepthMeasure)
 #add_subdirectory(examples/DepthAscii)
-add_subdirectory(examples/DepthCloud)
+add_subdirectory(src/DepthCloud)
 #add_subdirectory(examples/ExtractRawData)
 #add_subdirectory(examples/Tof_GLFW)
 #add_subdirectory(examples/SimplePointCloudViewer)
