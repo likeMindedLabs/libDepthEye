@@ -7,6 +7,13 @@ Thumbs.db
 # We EXCLUDE launch.json so team members share the same Launch Profiles
 !.vscode/launch.json
 
+# --- Integration / Plugin Specifics ---
+# Local developer configuration overrides
+local_dev.yaml
+local_dev.json
+.env
+libs/macos/share/pointcloud-1.0.0/fw/
+
 # --- Python Environment ---
 .venv/
 venv/
