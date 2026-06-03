@@ -2,7 +2,9 @@
 #include <cstdint>
 #include <cmath>
 #include "CameraSystem.h"
-#include <unistd.h>
+#ifndef _WIN32
+    #include <unistd.h>
+#endif
 #include <vector>
 #include <thread>
 #include <chrono>
