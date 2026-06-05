@@ -4,6 +4,9 @@
 #include "CameraSystem.h"
 #ifndef _WIN32
     #include <unistd.h>
+#else
+    #include <io.h>
+    #include <fcntl.h>
 #endif
 #include <vector>
 #include <thread>
@@ -94,6 +97,13 @@ void depthCallback(DepthCamera &dc, const Frame &frame, DepthCamera::FrameType c
 int main(int argc, char const *argv[]) {
     // Decouple std::cout from C stdio; we only write large binary blocks.
     std::ios::sync_with_stdio(false);
+
+#ifdef _WIN32
+    // Windows opens stdout in text mode by default, which corrupts binary data:
+    // 0x0A bytes become 0x0D 0x0A and 0x1A is treated as EOF. Switch to binary
+    // mode before any writes so the pipe carries raw float32 frames intact.
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
 
     CameraSystem sys;
 
